@@ -1,0 +1,26 @@
+---
+title: "Homework-4-Functions-APIs"
+format: pdf
+editor: visual
+---
+
+## Task 1: Conceptual Questions
+### Question 1
+lapply() applies a function to each element of a vector or list. The equivalent purrr function is map().
+
+### Question 2
+```{r}
+#| eval: false
+lapply(my_list, FUN = function(df) {
+                  cor(df, method = "kendall")
+                })
+```
+
+### Question 3
+purrr functions give a shorthand way to make anonymous functions. purrr gives a bit cleaner / more consistent way to apply functions to objects, especially when using tidyverse (it includes lots of additional helper functions).
+
+### Question 4
+A side-effect function modifies something outside the function, but doesn't necessarily automatically return the data as well.
+
+### Question 5
+When you call a function, it creates temporary function environments. R uses lexical scoping, so when you create a new variable like 'sd' in a function, it doesn't overwrite the sd function.
