@@ -11,6 +11,7 @@ lapply() applies a function to each element of a vector or list. The equivalent 
 ### Question 2
 ```{r}
 #| eval: false
+# lapply with anonymous function
 lapply(my_list, FUN = function(df) {
                   cor(df, method = "kendall")
                 })
@@ -24,3 +25,126 @@ A side-effect function modifies something outside the function, but doesn't nece
 
 ### Question 5
 When you call a function, it creates temporary function environments. R uses lexical scoping, so when you create a new variable like 'sd' in a function, it doesn't overwrite the sd function.
+
+## Task 2: Writing R Functions
+### Question 1
+```{r}
+# calculates and returns RMSE
+getRMSE <- function(resps, preds, ...) {
+  squared_errors <- (resps - preds)^2
+  return(sqrt(mean(squared_errors, ...)))
+}
+```
+
+### Question 2
+```{r}
+# setup
+set.seed(10)
+n <- 100
+x <- runif(n)
+resp <- 3 + 10*x + rnorm(n)
+pred <- predict(lm(resp ~ x), data.frame(x))
+ 
+# call function
+getRMSE(resp, pred)
+ 
+# set 2 values to NA
+resp[[1]] <- NA_real_
+resp[[2]] <- NA_real_
+# redo predictions based on NA vals being included
+pred <- predict(lm(resp ~ x), data.frame(x))
+ 
+# call function with and without specifying whether to disregard NA vals
+getRMSE(resp, pred)
+getRMSE(resp, pred, na.rm = TRUE)
+```
+
+### Question 3
+```{r}
+# calculates and returns MAE
+getMAE <- function(resps, preds, ...) {
+  absolute_errors <- abs(resps - preds)
+  return(mean(absolute_errors, ...))
+}
+```
+
+### Question 4
+```{r}
+# setup
+set.seed(10)
+n <- 100
+x <- runif(n)
+resp <- 3 + 10*x + rnorm(n)
+pred <- predict(lm(resp ~ x), data.frame(x))
+ 
+# call function
+getMAE(resp, pred)
+
+# set 2 values to NA
+resp[[1]] <- NA_real_
+resp[[2]] <- NA_real_
+
+# redo predictions based on NA vals being included
+pred <- predict(lm(resp ~ x), data.frame(x))
+
+# call function with and without specifying whether to disregard NA vals
+getMAE(resp, pred)
+getMAE(resp, pred, na.rm = TRUE)
+```
+
+### Question 5
+```{r}
+# wrapper function with default metrics param and ...
+getMetrics <- function(resps, preds, metrics = c("RMSE", "MAE"), ...) {
+  if (!(is.vector(resps) && is.numeric(resps) && is.vector(preds) 
+        && is.numeric(preds))) {
+    
+    # warning message and return
+    message("Both responses and predictions should be numeric vectors")
+    return(invisible(NULL))
+  }
+  
+  results <- list()
+  
+  # if RMSE in metrics param calc RMSE
+  if ("RMSE" %in% metrics) {
+    results$RMSE <- getRMSE(resps, preds, ...)
+  }
+  # if MAE in metrics param calc MAE
+  if ("MAE" %in% metrics) {
+    results$MAE <- getMAE(resps, preds, ...)
+  }
+  
+  return(results)
+}
+```
+
+### Question 6
+```{r}
+# setup
+set.seed(10)
+n <- 100
+x <- runif(n)
+resp <- 3 + 10*x + rnorm(n)
+pred <- predict(lm(resp ~ x), data.frame(x))
+
+# call function
+getMetrics(resp, pred, metrics = "RMSE")
+getMetrics(resp, pred, metrics = "MAE")
+getMetrics(resp, pred, metrics = c("RMSE", "MAE"))
+
+# set 2 values to NA
+resp[[1]] <- NA_real_
+resp[[2]] <- NA_real_
+
+# redo predictions based on NA vals being included
+pred <- predict(lm(resp ~ x), data.frame(x))
+
+# call function using all combos of metrics param and disregard NA vals
+getMetrics(resp, pred, metrics = "RMSE", na.rm = TRUE)
+getMetrics(resp, pred, metrics = "MAE", na.rm = TRUE)
+getMetrics(resp, pred, metrics = c("RMSE", "MAE"), na.rm = TRUE)
+
+# call function with incorrect data
+getMetrics(data.frame(y = c(1)), data.frame(y_pred = c(2)))
+```
