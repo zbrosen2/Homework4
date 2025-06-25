@@ -169,10 +169,10 @@ resp <- GET("https://newsapi.org/v2/everything", query = list(
 
 ### Question 2
 ```{r}
-# parse raw content to JSON and then to list
+# parse raw content to JSON and then to list (non tidy but will be tidy in 3)
 parsed <- fromJSON(rawToChar(resp$content))
 
-# get articles column and convert to tibble
+# get articles column and convert to tibble (non tidy but will be tidy in 3)
 as_tibble(parsed$articles)
 ```
 
@@ -180,13 +180,16 @@ as_tibble(parsed$articles)
 ```{r}
 # function that queries API for articles with subject, from, and api_key params
 queryAPI <- function(subject, from, api_key) {
-  resp <- GET("https://newsapi.org/v2/everything", query = list(
+  list(
     q = subject,
     from = from,
     apiKey = api_key
-  ))
-  parsed <- fromJSON(rawToChar(resp$content))
-  return(as_tibble(parsed$articles))
+  ) %>%
+  GET("https://newsapi.org/v2/everything", query = .) %>%
+  content(as = "text") %>%  
+  fromJSON() %>%
+  pluck("articles") %>%
+  as_tibble()
 }
 
 # call function
