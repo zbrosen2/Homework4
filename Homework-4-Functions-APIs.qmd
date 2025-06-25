@@ -148,3 +148,47 @@ getMetrics(resp, pred, metrics = c("RMSE", "MAE"), na.rm = TRUE)
 # call function with incorrect data
 getMetrics(data.frame(y = c(1)), data.frame(y_pred = c(2)))
 ```
+
+## Task 3: Querying an API and a Tidy-Style Function
+### Question 1
+```{r}
+#| warning: false
+library(tidyverse)
+library(httr)
+library(jsonlite)
+
+api_key <- "86074e5006bb450db86061bc67de258c"
+
+# GET call with q, from, and apiKey query params
+resp <- GET("https://newsapi.org/v2/everything", query = list(
+  q = "Physics",
+  from = "2025-05-24",
+  apiKey = api_key
+))
+```
+
+### Question 2
+```{r}
+# parse raw content to JSON and then to list
+parsed <- fromJSON(rawToChar(resp$content))
+
+# get articles column and convert to tibble
+as_tibble(parsed$articles)
+```
+
+### Question 3
+```{r}
+# function that queries API for articles with subject, from, and api_key params
+queryAPI <- function(subject, from, api_key) {
+  resp <- GET("https://newsapi.org/v2/everything", query = list(
+    q = subject,
+    from = from,
+    apiKey = api_key
+  ))
+  parsed <- fromJSON(rawToChar(resp$content))
+  return(as_tibble(parsed$articles))
+}
+
+# call function
+queryAPI("gamestop", "2025-05-30", api_key = api_key)
+```
